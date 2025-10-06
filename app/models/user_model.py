@@ -81,8 +81,6 @@ class MembersDB(MembersBase):
     }
 
 # leadership
-
-
 class LeadershipCreate(BaseModel):
     name: str
     designation: str
@@ -93,6 +91,18 @@ class LeadershipCreate(BaseModel):
     image_base64: Optional[str]
 
 class LeadershipDB(LeadershipCreate):
+    id: str
+    model_config = {
+        "from_attributes": True
+    }
+
+#experience
+class ExperienceCreate(BaseModel):
+    title: str
+    description: str
+    time: str
+
+class ExperienceDB(ExperienceCreate):
     id: str
     model_config = {
         "from_attributes": True
