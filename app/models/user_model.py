@@ -75,9 +75,10 @@ class MembersCreate(MembersBase):
 class MembersDB(MembersBase):
     id: Optional[str] = Field(alias="_id")
 
-    class Config:
-        orm_mode = True
-        populate_by_name = True
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
 
 # leadership
 
@@ -93,6 +94,6 @@ class LeadershipCreate(BaseModel):
 
 class LeadershipDB(LeadershipCreate):
     id: str
-    class Config:
-        orm_mode = True
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
