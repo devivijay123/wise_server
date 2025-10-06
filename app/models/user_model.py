@@ -61,8 +61,8 @@ class AboutDB(AboutBase):
 class MembersBase(BaseModel):
     title: Optional[str]
     description: Optional[str]
-    image1: Optional[str]  # base64 string
-    image2: Optional[str]  # base64 string
+    image1: Optional[str] 
+    image2: Optional[str] 
     community_title: Optional[str]
     community_subtitle: Optional[str]
     community_description: Optional[str]
