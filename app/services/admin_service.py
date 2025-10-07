@@ -1,7 +1,7 @@
 from app.database import db
-from app.models.user_model import AboutCreate, AboutUpdate, LeadershipCreate
+from app.models.user_model import AboutCreate, AboutUpdate, LeadershipCreate, Experience
 from bson import ObjectId
-from app.database import hero_collection, about_collection, members_collection, leadership_collection
+from app.database import hero_collection, about_collection, members_collection, leadership_collection, experience_collection
 from typing import Optional, Dict, Any
 #hero section
 def create_hero(data: dict):
@@ -116,4 +116,38 @@ def update_leader(member_id: str, payload: LeadershipCreate):
 
 def delete_leader(member_id: str):
     result = leadership_collection.delete_one({"_id": ObjectId(member_id)})
+    return result.deleted_count > 0
+
+#Experience
+def serialize_experience(exp) -> dict:
+    return {
+        "id": str(exp["_id"]),
+        "title": exp["title"],
+        "description": exp["description"],
+        "frequency": exp["frequency"],
+        "icon_name": exp["icon_name"],
+    }
+
+# Get all experiences
+def get_all_experiences():
+    experiences = experience_collection.find()
+    return [serialize_experience(e) for e in experiences]
+
+# Create experience
+def create_experience(experience: Experience):
+    new_exp = experience.dict(by_alias=True, exclude={"id"})
+    result = experience_collection.insert_one(new_exp)
+    return str(result.inserted_id)
+
+# Update experience
+def update_experience(id: str, experience: Experience):
+    result = experience_collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": experience.dict(by_alias=True, exclude={"id"})},
+    )
+    return result.modified_count > 0
+
+# Delete experience
+def delete_experience(id: str):
+    result = experience_collection.delete_one({"_id": ObjectId(id)})
     return result.deleted_count > 0

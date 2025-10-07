@@ -97,13 +97,15 @@ class LeadershipDB(LeadershipCreate):
     }
 
 #experience
-class ExperienceCreate(BaseModel):
+
+class Experience(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
     title: str
     description: str
-    time: str
+    frequency: str
+    icon_name: str  # example: 'moon', 'microphone', 'trophy'
 
-class ExperienceDB(ExperienceCreate):
-    id: str
-    model_config = {
-        "from_attributes": True
-    }
+    class Config:
+        json_encoders = {ObjectId: str}
+        populate_by_name = True
+        arbitrary_types_allowed = True

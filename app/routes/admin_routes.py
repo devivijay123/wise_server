@@ -1,34 +1,13 @@
-from fastapi import APIRouter, HTTPException, Form, File, UploadFile
-from app.models.user_model import  AdminLogin, AboutCreate, AboutUpdate, AboutDB, LeadershipCreate, MembersDB, MembersCreate, LeadershipDB
+from fastapi import APIRouter, HTTPException, Form, File, UploadFile, Depends
+from app.models.user_model import  AdminLogin, AboutCreate, AboutUpdate, AboutDB, LeadershipCreate, MembersDB, MembersCreate, LeadershipDB, Experience
 from app.database import admin_collection
 from app.services import admin_service
 from app.utils.tokens import create_access_token, verify_password
+from app.utils.dependencies import get_current_admin
 from typing import List
 import base64
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-# @router.post("/", response_model=dict)
-# async def create_user(user: User):
-#     return await user_service.create_user(user)
-
-# @router.get("/", response_model=list)
-# async def get_users():
-#     return await user_service.get_users()
-
-# @router.get("/{user_id}", response_model=dict)
-# async def get_user(user_id: str):
-#     user = await user_service.get_user_by_id(user_id)
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return user
-
-# @router.delete("/{user_id}")
-# async def delete_user(user_id: str):
-#     deleted = await user_service.delete_user(user_id)
-#     if not deleted:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return {"message": "User deleted successfully"}
 
 
 @router.post("/login")
@@ -55,7 +34,8 @@ async def create_hero(
     button1_link: str = Form(None),
     button2_text: str = Form(None),
     button2_link: str = Form(None),
-    images: List[UploadFile] = File(...)
+    images: List[UploadFile] = File(...),
+ 
 ):
     # Convert images into base64 array
     image_base64_list = []
@@ -133,7 +113,7 @@ def create_about(payload: AboutCreate):
     # if you want a single document only: delete existing and insert or raise
     existing = admin_service.get_about()
     if existing:
-        raise HTTPException(status_code=400, detail="About already exists. Use PUT to update.")
+        raise HTTPException(status_code=400, detail="About already exists.")
     doc = admin_service.create_about(payload)
     return doc
 
@@ -180,31 +160,55 @@ def update_members(id: str, payload: MembersCreate):
 
 # leadership
 @router.get("/leadership", response_model=list[LeadershipDB])
-def get_all_members():
-    return admin_service.get_all_members()
+def get_all_leaders():
+    return admin_service.get_all_leaders()
 
 @router.get("/leadership/{member_id}", response_model=LeadershipDB)
-def get_member(member_id: str):
-    member = admin_service.get_member_by_id(member_id)
+def get_leader(member_id: str):
+    member = admin_service.get_leader_by_id(member_id)
     if not member:
         raise HTTPException(status_code=404, detail="Member not found")
     return member
 
 @router.post("/leadership", response_model=dict)
-def create_member(payload: LeadershipCreate):
-    member_id = admin_service.create_member(payload)
+def create_leader(payload: LeadershipCreate):
+    member_id = admin_service.create_leader(payload)
     return {"id": member_id}
 
 @router.put("/leadership/{member_id}", response_model=dict)
-def update_member(member_id: str, payload: LeadershipCreate):
-    success = admin_service.update_member(member_id, payload)
+def update_leader(member_id: str, payload: LeadershipCreate):
+    success = admin_service.update_leader(member_id, payload)
     if not success:
         raise HTTPException(status_code=404, detail="Member not found")
     return {"status": "updated"}
 
 @router.delete("/leadership/{member_id}", response_model=dict)
-def delete_member(member_id: str):
-    success = admin_service.delete_member(member_id)
+def delete_leader(member_id: str):
+    success = admin_service.delete_leader(member_id)
     if not success:
         raise HTTPException(status_code=404, detail="Member not found")
     return {"status": "deleted"}
+
+# experience
+@router.get("/experiences", response_model=List[dict])
+async def get_experiences():
+    return admin_service.get_all_experiences()
+
+@router.post("/experiences")
+async def add_experience(experience: Experience):
+    exp_id = admin_service.create_experience(experience)
+    return {"message": "Experience created successfully", "id": exp_id}
+
+@router.put("/experiences/{id}")
+async def edit_experience(id: str, experience: Experience):
+    updated = admin_service.update_experience(id, experience)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Experience not found")
+    return {"message": "Experience updated successfully"}
+
+@router.delete("/experiences/{id}")
+async def remove_experience(id: str):
+    deleted = admin_service.delete_experience(id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Experience not found")
+    return {"message": "Experience deleted successfully"}
