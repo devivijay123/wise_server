@@ -41,7 +41,7 @@ def admin_login(credentials: AdminLogin):
     if not verify_password(credentials.password, admin["password"]):
         raise HTTPException(status_code=401, detail="Incorrect password")
 
-    token = create_access_token(credentials.email)
+    token = create_access_token({"sub": credentials.email})
     return {"access_token": token, "token_type": "bearer"}
 
 
